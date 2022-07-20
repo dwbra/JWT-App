@@ -12,6 +12,7 @@ const userSchema = new Schema({
 });
 
 //create the model.
+//pass third param to specify which collection to pass data into
 //https://mongoosejs.com/docs/api.html#mongoose_Mongoose-model
 const User = model("User", userSchema, "users");
 export default User;
