@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 import userRoutes from "./routes/userRoutes.js";
+import testRoutes from "./routes/testRoutes.js";
 
 //get access to env variables
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 const PORT = process.env.PORT || 5001;
 
 //set routes for the app to use
+app.use("/", testRoutes);
 app.use("/user", userRoutes);
 
 //establish a connection to the db and initialise the server
