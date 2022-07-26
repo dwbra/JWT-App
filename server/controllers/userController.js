@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import User from "../models/userModel.js";
+import RefreshToken from "../models/refreshTokenModel.js";
 
 const accessToken = id => {
   return jwt.sign({ userId: id }, process.env.ACCESS_TOKEN_SECRET, {
@@ -18,14 +19,27 @@ const refreshToken = id => {
 
 export const getRefreshToken = async (req, res) => {
   const refreshTkn = req.body.refreshToken;
+  if (!refreshTkn) {
+    return res.status(401).json("Token is required!");
+  }
   const decode = jwt.verify(refreshTkn, process.env.REFRESH_TOKEN_SECRET);
   if (!decode) {
     return res.status(403).json("Invalid token");
   }
   const user_id = decode.id;
-  const newAccessToken = accessToken(user_id);
-  const newRefreshToken = refreshToken(user_id);
-  res.status(200).json({ newAccessToken, newRefreshToken });
+  const findToken = await RefreshToken.findOne({ token: refreshTkn });
+  if (!findToken) {
+    return res.status(403).json("Token has been expired. Sign in again.");
+  } else {
+    const newAccessToken = accessToken(user_id);
+    const newRefreshToken = refreshToken(user_id);
+    let new_token = await RefreshToken.findOneAndUpdate(
+      { token: refreshTkn },
+      { token: newRefreshToken },
+      { new: true }
+    );
+    res.status(200).json({ newAccessToken, newRefreshToken });
+  }
 };
 
 export const createUser = async (req, res) => {
@@ -48,13 +62,22 @@ export const createUser = async (req, res) => {
       password: hashedPassword,
       name: `${firstName} ${lastName}`
     });
+
     //generate a jwt access token
     //https://www.npmjs.com/package/jsonwebtoken
     const newAccessTkn = accessToken(result._id);
     const newRefreshTkn = refreshToken(result._id);
-    res
-      .status(200)
-      .json({ accessToken: newAccessTkn, refreshToken: newRefreshTkn });
+
+    const generateNewRefreshToken = await RefreshToken.create({
+      token: newRefreshTkn,
+      user: result._id
+    });
+
+    res.status(200).json({
+      accessToken: newAccessTkn,
+      refreshToken: newRefreshTkn,
+      generateNewRefreshToken: generateNewRefreshToken
+    });
   } catch (error) {
     res.status(500).json({ message: "something went wrong" });
   }
@@ -75,19 +98,30 @@ export const loginUser = async (req, res) => {
     //check that the password is correct and store in a const variable to use as truthy/falsy conditional
     const passwordCorrect = await bcrypt.compare(password, hashedPassword);
 
+    const newAccessTkn = accessToken(jwtUserID);
+    const newRefreshTkn = refreshToken(jwtUserID);
+    const findToken = await RefreshToken.findOne({ user: jwtUserID });
+
     if (passwordCorrect) {
-      //   let accessToken = jwt.sign(jwtUser, process.env.ACCESS_TOKEN_SECRET, {
-      //     expiresIn: "10m"
-      //   });
-      //   let refreshToken = jwt.sign(jwtUser, process.env.REFRESH_TOKEN_SECRET);
-      const newAccessTkn = accessToken(jwtUserID);
-      const newRefreshTkn = refreshToken(jwtUserID);
+      if (!findToken) {
+        const generateNewRefreshToken = await RefreshToken.create({
+          token: newRefreshTkn,
+          user: jwtUserID
+        });
+      } else {
+        let existingUserToken = await RefreshToken.findOneAndUpdate(
+          { user: jwtUserID },
+          { token: newRefreshTkn },
+          { new: true }
+        );
+      }
+
       res.status(200).json({
-        accessToken: newAccessTkn,
-        refreshToken: newRefreshTkn
+        newAccessTkn: newAccessTkn,
+        newRefreshTkn: newRefreshTkn
       });
     } else {
-      res.send("Not Allowed");
+      res.send("Password incorrect");
     }
   } catch (error) {
     res.status(500).send(error);
