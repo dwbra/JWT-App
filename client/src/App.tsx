@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
+import React, { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import AuthForm from "./components/AuthForm/AuthForm";
+import HiddenContent from "./components/HiddenContent/HiddenContent";
 
 function App() {
+  const [tokens, setTokens] = useState({});
+
+  //   console.log(tokens);
+
   return (
     <>
-      <AuthForm />
+      <Routes>
+        <Route path="/" element={<AuthForm setTokens={setTokens} />} />
+        <Route path="/home" element={<HiddenContent tokens={tokens} />} />
+      </Routes>
     </>
   );
 }

@@ -18,6 +18,7 @@ const refreshToken = id => {
 };
 
 export const getRefreshToken = async (req, res) => {
+  console.log(req.body);
   const refreshTkn = req.body.refreshToken;
   if (!refreshTkn) {
     return res.status(401).json("Token is required!");

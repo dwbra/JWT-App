@@ -4,9 +4,9 @@ import { Visibility, VisibilityOff } from "@material-ui/icons/";
 import { Input, Button, InputAdornment, IconButton } from "@material-ui/core/";
 import axios from "axios";
 
-type Props = {};
-
-function AuthForm({}: Props) {
+function AuthForm(props: any) {
+  const { setTokens } = props;
+  const navigate = useNavigate();
   //set the initial state for the auth form to be signin
   const [isSignup, setIsSignup] = useState(false);
   //create a new set of data for the form and set the initial state as the empty fields above
@@ -36,6 +36,8 @@ function AuthForm({}: Props) {
         .post("http://localhost:5001/user/login-user", formData)
         .then(function (response) {
           console.log(response);
+          let data = response.data;
+          setTokens(data);
         })
         .catch(function (error) {
           console.log(error);
@@ -46,11 +48,14 @@ function AuthForm({}: Props) {
         .post("http://localhost:5001/user/create-user", formData)
         .then(function (response) {
           console.log(response);
+          let data = response.data;
+          setTokens(data);
         })
         .catch(function (error) {
           console.log(error);
         });
     }
+    navigate("/home");
   };
 
   //when any input field in the formData state is updated it will take a copy of the initial state
