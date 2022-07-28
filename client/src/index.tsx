@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HiddenContent from "./components/HiddenContent/HiddenContent";
+import HiddenContent from "./components/Home/Home";
 import AuthForm from "./components/AuthForm/AuthForm";
 import App from "./App";
 

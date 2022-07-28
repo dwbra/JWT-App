@@ -5,7 +5,7 @@ import verifyToken from "../middleware/verifyTokenMiddleware.js";
 const router = express.Router();
 
 //create a get request pathway for the frontend to pull users playlists
-router.get("/", verifyToken, (req, res) => {
+router.post("/", verifyToken, (req, res) => {
   res.status(200).json("Welcome to homepage");
 });
 
