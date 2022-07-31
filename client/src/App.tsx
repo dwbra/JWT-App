@@ -5,21 +5,27 @@ import Home from "./components/Home/Home";
 import Cookies from "universal-cookie";
 
 function App() {
-  const [tokens, setTokens] = useState({});
   const cookies = new Cookies();
-
-  //   console.log(tokens);
+  const [userSignedIn, setUserSignedIn] = useState(false);
 
   return (
     <>
       <Routes>
         <Route
           path="/"
-          element={<AuthForm setTokens={setTokens} cookies={cookies} />}
+          element={
+            <AuthForm cookies={cookies} setUserSignedIn={setUserSignedIn} />
+          }
         />
         <Route
           path="/home"
-          element={<Home tokens={tokens} cookies={cookies} />}
+          element={
+            userSignedIn ? (
+              <Home cookies={cookies} setUserSignedIn={setUserSignedIn} />
+            ) : (
+              <AuthForm cookies={cookies} setUserSignedIn={setUserSignedIn} />
+            )
+          }
         />
       </Routes>
     </>

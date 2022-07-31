@@ -18,19 +18,20 @@ const refreshToken = id => {
 };
 
 export const getRefreshToken = async (req, res) => {
-  console.log(req.body);
-  const refreshTkn = req.body.refreshToken;
+  // console.log(req.body.refreshTkn);
+  const refreshTkn = req.body.refreshTkn;
+
   if (!refreshTkn) {
-    return res.status(401).json("Token is required!");
+    return res.status(401).send("Token is required!");
   }
   const decode = jwt.verify(refreshTkn, process.env.REFRESH_TOKEN_SECRET);
   if (!decode) {
-    return res.status(403).json("Invalid token");
+    return res.status(403).send("Invalid token");
   }
   const user_id = decode.id;
   const findToken = await RefreshToken.findOne({ token: refreshTkn });
   if (!findToken) {
-    return res.status(403).json("Token has been expired. Sign in again.");
+    return res.status(403).send("Token has been expired. Sign in again.");
   } else {
     const newAccessToken = accessToken(user_id);
     const newRefreshToken = refreshToken(user_id);

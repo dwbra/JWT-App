@@ -5,7 +5,7 @@ import { Input, Button, InputAdornment, IconButton } from "@material-ui/core/";
 import axios from "axios";
 
 function AuthForm(props: any) {
-  const { setTokens, cookies } = props;
+  const { setUserSignedIn, cookies } = props;
   const navigate = useNavigate();
   //set the initial state for the auth form to be signin
   const [isSignup, setIsSignup] = useState(false);
@@ -34,7 +34,7 @@ function AuthForm(props: any) {
     if (isSignup === false) {
       axios
         .post("http://localhost:5001/user/login-user", formData)
-        .then(function (response) {
+        .then((response) => {
           // console.log(response);
           // let data = response.data;
           const rToken = response.data.newRefreshTkn;
@@ -42,20 +42,22 @@ function AuthForm(props: any) {
           // setTokens(data);
           cookies.set("refreshToken", rToken, { path: "/" });
           // console.log(cookies.get("refreshToken"));
+          setUserSignedIn(true);
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
         });
     } else {
       //if they are creating a new user
       axios
         .post("http://localhost:5001/user/create-user", formData)
-        .then(function (response) {
+        .then((response) => {
           console.log(response);
-          let data = response.data;
-          setTokens(data);
+          // let data = response.data;
+          // setTokens(data);
+          setUserSignedIn(true);
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
         });
     }

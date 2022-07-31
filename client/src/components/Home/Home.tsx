@@ -1,55 +1,63 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AuthForm from "../AuthForm/AuthForm";
 import axios from "axios";
 
 function Home(props: any) {
-  const { tokens, cookies } = props;
-  // const refreshToken = tokens.newRefreshTkn;
-  // console.log(refreshToken);
-  // const MINUTE_MS = 300000;
-  // const test = 3000;
-
+  const { cookies, setUserSignedIn } = props;
   let refreshTkn = cookies.get("refreshToken");
-  let xhr = new XMLHttpRequest();
-  xhr.open("POST", "http://localhost:3000/");
-  xhr.setRequestHeader("Cookie", refreshTkn);
+
+  //useRef to stop the useEffect from firing on the initial render.
+  //This is because on initial load the token has just been set and we only need to send a request to update
+  //on the next re-render of the component however it may be triggered.
+  const didMount = useRef(false);
 
   useEffect(() => {
-    axios
-      .post("http://localhost:5001/", refreshTkn)
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }, []);
+    if (didMount.current) {
+      axios
+        .post("http://localhost:5001/user/get-refresh-token", {
+          refreshTkn: refreshTkn
+        })
+        .then((response) => {
+          console.log(response);
+          const newRefreshToken = response.data.newRefreshToken;
+          console.log(newRefreshToken);
+          cookies.set("refreshToken", newRefreshToken, { path: "/" });
+        })
+        .catch((error) => {
+          console.log(error);
+          alert(error.response.data);
+          setUserSignedIn(false);
+        });
+    } else {
+      didMount.current = true;
+    }
+  });
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (Object.keys(tokens).length === 0) {
-  //       axios
-  //         .post("http://localhost:5001/user/get-refresh-token", refreshToken)
-  //         .then(function (response) {
-  //           console.log(response);
-  //         })
-  //         .catch(function (error) {
-  //           console.log(error);
-  //         });
-  //     }
-  //   }, test);
-
-  //   return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
-  // }, []);
+  let [buttonState, setButtonState] = useState(0);
+  const exampleChangeSomeState = () => {
+    setButtonState(buttonState++);
+  };
+  console.log(buttonState);
 
   return (
     <>
-      <h1>HiddenContent</h1>
-      <p>
-        This is a page that can only be accessed via auth. It has refresh token
-        wrapped around this so that it will consistently check if the token is
-        expired.
-      </p>
+      <div className="homePage">
+        <h1>HiddenContent</h1>
+        <h2>
+          This is a page that can only be accessed via auth. It has refresh
+          token wrapped around this so that it will consistently check if the
+          token is expired.
+        </h2>
+        <h3>
+          If you watch in the inspector application tab, you will note that when
+          the state changes, this will cause a re-render and that this will fire
+          off the JWT useEffect function to check if the token is valid. If it
+          is it stays the same, if not it is updated and reset in the cookie.
+        </h3>
+        <button onClick={exampleChangeSomeState}>
+          Watch the state change and JWT token update
+        </button>
+      </div>
     </>
   );
 }
