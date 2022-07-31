@@ -3,7 +3,9 @@ import AuthForm from "../AuthForm/AuthForm";
 import axios from "axios";
 
 function Home(props: any) {
+  //grab the functions from parent component via props
   const { cookies, setUserSignedIn } = props;
+  //grab the refresh token from the browser which was set during auth.
   let refreshTkn = cookies.get("refreshToken");
 
   //useRef to stop the useEffect from firing on the initial render.
@@ -11,6 +13,8 @@ function Home(props: any) {
   //on the next re-render of the component however it may be triggered.
   const didMount = useRef(false);
 
+  //useEffect to fire on all re-renders except the first to check if the user still has permission to view the component
+  //console logging out the results to help illustrate the process
   useEffect(() => {
     if (didMount.current) {
       axios
@@ -33,6 +37,7 @@ function Home(props: any) {
     }
   });
 
+  //simple button to illustrate what happens on state change which forces a re-render
   let [buttonState, setButtonState] = useState(0);
   const exampleChangeSomeState = () => {
     setButtonState(buttonState++);

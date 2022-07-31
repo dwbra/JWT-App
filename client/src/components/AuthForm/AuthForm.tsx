@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@material-ui/icons/";
 import { Input, Button, InputAdornment, IconButton } from "@material-ui/core/";
 import axios from "axios";
 
 function AuthForm(props: any) {
+  //grab the functions from the parent component via props
   const { setUserSignedIn, cookies } = props;
-  const navigate = useNavigate();
   //set the initial state for the auth form to be signin
   const [isSignup, setIsSignup] = useState(false);
   //create a new set of data for the form and set the initial state as the empty fields above
@@ -35,13 +34,10 @@ function AuthForm(props: any) {
       axios
         .post("http://localhost:5001/user/login-user", formData)
         .then((response) => {
-          // console.log(response);
-          // let data = response.data;
           const rToken = response.data.newRefreshTkn;
-          // console.log(rToken);
-          // setTokens(data);
+          //set the JWT token from the response in browser cookies
           cookies.set("refreshToken", rToken, { path: "/" });
-          // console.log(cookies.get("refreshToken"));
+          //update parent state to control visibility on the homepage component
           setUserSignedIn(true);
         })
         .catch((error) => {
@@ -52,16 +48,16 @@ function AuthForm(props: any) {
       axios
         .post("http://localhost:5001/user/create-user", formData)
         .then((response) => {
-          console.log(response);
-          // let data = response.data;
-          // setTokens(data);
+          const rToken = response.data.newRefreshTkn;
+          //set the JWT token from the response in browser cookies
+          cookies.set("refreshToken", rToken, { path: "/" });
+          //update parent state to control visibility on the homepage component
           setUserSignedIn(true);
         })
         .catch((error) => {
           console.log(error);
         });
     }
-    navigate("/home");
   };
 
   //when any input field in the formData state is updated it will take a copy of the initial state

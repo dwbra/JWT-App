@@ -5,7 +5,9 @@ import Home from "./components/Home/Home";
 import Cookies from "universal-cookie";
 
 function App() {
+  //initalize cookies to then pass to children components
   const cookies = new Cookies();
+  //initalize some state to pass to children components to control access to the application
   const [userSignedIn, setUserSignedIn] = useState(false);
 
   return (
@@ -13,12 +15,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            <AuthForm cookies={cookies} setUserSignedIn={setUserSignedIn} />
-          }
-        />
-        <Route
-          path="/home"
+          //use state to control if access is allowed on the home route to the homepage or auth screen
           element={
             userSignedIn ? (
               <Home cookies={cookies} setUserSignedIn={setUserSignedIn} />
